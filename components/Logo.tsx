@@ -16,11 +16,11 @@ export const Logo: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl' }> = ({ size = 'm
     <div className={`flex items-center justify-center ${containerWidth[size]} select-none`}>
        {!hasError ? (
          <img 
-           src="logo.png" 
+           src="./logo.png" 
            alt="Reto 33" 
            className="w-full h-auto object-contain hover:scale-105 transition-transform duration-300 drop-shadow-sm"
            onError={(e) => {
-             console.warn("Error al cargar logo.png. Asegúrate de que el archivo esté en la carpeta raíz.");
+             console.error("Error cargando ./logo.png. Verifica que el archivo esté en la raíz del proyecto (public folder).");
              setHasError(true);
            }}
          />

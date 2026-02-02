@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reto 33 - Renovación Total</title>
+    <!-- Polyfill for process.env to work in browser without bundler -->
+    <script>
+      window.process = {
+        env: {
+          NODE_ENV: 'production',
+          API_KEY: '' // La API Key se inyectará aquí o se manejará en el servicio
+        }
+      };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
