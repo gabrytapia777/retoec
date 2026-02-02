@@ -9,35 +9,25 @@ export const Logo: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl' }> = ({ size = 'm
     xl: 'w-80'
   };
 
-  // Adjusting font sizes to maintain proportion with the image container
-  const textSizes = {
-    sm: 'text-[8px]',
-    md: 'text-[10px]',
-    lg: 'text-[13px]',
-    xl: 'text-[16px]'
-  };
-
   return (
-    <div className={`flex flex-col items-center justify-center ${containerWidth[size]} select-none`}>
+    <div className={`flex items-center justify-center ${containerWidth[size]} select-none`}>
        {/* 
-         NOTA: El código espera que exista un archivo llamado 'logo.png' 
-         en la carpeta 'public' de tu proyecto.
-         Ruta esperada: /public/logo.png
+         Muestra exclusivamente el archivo logo.png.
+         Si la imagen falla, muestra un texto de respaldo.
        */}
        <img 
-         src="/logo.png" 
-         alt="Logo Reto 33" 
-         className="w-full h-auto object-contain mb-1 drop-shadow-sm"
+         src="logo.png" 
+         alt="Reto 33 - Renovación Total" 
+         className="w-full h-auto object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
          onError={(e) => {
-           // Si la imagen no carga, mostramos un mensaje sutil en consola o UI
-           console.warn("Imagen /logo.png no encontrada. Asegúrate de colocarla en la carpeta public.");
-           e.currentTarget.style.opacity = '0.3';
+           // Fallback visual por si la imagen no carga
+           e.currentTarget.style.display = 'none';
+           const fallback = document.createElement('div');
+           fallback.className = "text-center";
+           fallback.innerHTML = '<span class="font-black text-reto-navy text-2xl block">RETO 33</span><span class="text-xs text-reto-pink tracking-widest uppercase">Renovación Total</span>';
+           e.currentTarget.parentNode?.appendChild(fallback);
          }}
        />
-       
-       <span className={`font-black text-reto-navy tracking-[0.25em] ${textSizes[size]} mt-1 text-center whitespace-nowrap leading-none`} style={{ fontFamily: 'Inter, sans-serif' }}>
-         RENOVACIÓN TOTAL
-       </span>
     </div>
   );
 };
