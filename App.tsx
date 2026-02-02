@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import * as XLSX from 'xlsx';
 import { 
@@ -12,43 +12,43 @@ import {
   CheckCircle, 
   Lock, 
   User as UserIcon,
-  ChevronRight,
-  Gift,
-  Search,
-  Loader2,
-  Settings,
-  Calendar,
-  History,
-  Trash2,
-  Save,
-  ChevronDown,
-  ChevronUp,
-  Film,
-  Music,
-  Gamepad2,
-  BookOpen,
-  ArrowLeft,
-  Building2,
-  Map,
-  HardHat,
-  Flag,
-  Mail,
-  Send,
-  Shield,
-  Users,
-  Database,
-  Eye,
-  FileSpreadsheet,
-  KeyRound,
-  AlertCircle,
-  UserPlus,
-  FileText,
-  Edit,
-  Plus,
-  MinusCircle,
-  ImageIcon,
-  Upload,
-  Sparkles,
+  ChevronRight, 
+  Gift, 
+  Search, 
+  Loader2, 
+  Settings, 
+  Calendar, 
+  History, 
+  Trash2, 
+  Save, 
+  ChevronDown, 
+  ChevronUp, 
+  Film, 
+  Music, 
+  Gamepad2, 
+  BookOpen, 
+  ArrowLeft, 
+  Building2, 
+  Map, 
+  HardHat, 
+  Flag, 
+  Mail, 
+  Send, 
+  Shield, 
+  Users, 
+  Database, 
+  Eye, 
+  FileSpreadsheet, 
+  KeyRound, 
+  AlertCircle, 
+  UserPlus, 
+  FileText, 
+  Edit, 
+  Plus, 
+  MinusCircle, 
+  ImageIcon, 
+  Upload, 
+  Sparkles, 
   AlertTriangle
 } from 'lucide-react';
 import { 
@@ -58,7 +58,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
+  ResponsiveContainer, 
   Cell
 } from 'recharts';
 
@@ -99,6 +99,39 @@ const removeFromMasterDB = (userId: string) => {
   const db = getMasterDB().filter(u => u.id !== userId);
   localStorage.setItem(DB_KEY, JSON.stringify(db));
 };
+
+// --- INITIALIZATION OF DEFAULT ADMIN ---
+const initDefaultAdmin = () => {
+  const db = getMasterDB();
+  const adminEmail = 'gtplayec@gmail.com';
+  
+  // Check if admin already exists
+  if (!db.find(u => u.email.toLowerCase() === adminEmail.toLowerCase())) {
+    const defaultAdmin: User = {
+      id: 'admin-master-001',
+      name: 'Admin',
+      surname: 'Principal',
+      age: 99,
+      phone: '0999999999',
+      sector: 'Administración',
+      email: adminEmail,
+      password: 'RETO2026', // Password defined by user
+      role: 'admin',
+      registeredAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      isVerified: true,
+      hasVotedCurrentWeek: false,
+      downloadHistory: [],
+      surveyHistory: []
+    };
+    db.push(defaultAdmin);
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    console.log('Default administrator initialized.');
+  }
+};
+
+// Run initialization immediately
+initDefaultAdmin();
 
 // --- Layout Components ---
 
@@ -831,6 +864,8 @@ const AdminDashboard = ({ surveys, onUpdateSurvey, onAddSurvey }: { surveys: Sur
 };
 
 const DashboardScreen = ({ user }: { user: User }) => {
+  const navigate = useNavigate();
+  const [view, setView] = useState<'menu' | 'installers'>('menu');
   const [warningInstaller, setWarningInstaller] = useState<Installer | null>(null);
 
   const processDownload = (installer: Installer) => {
@@ -866,13 +901,67 @@ const DashboardScreen = ({ user }: { user: User }) => {
     }
   };
 
-  return (
-    <div className="space-y-6 relative">
-      <div className="bg-gradient-to-r from-reto-navy to-blue-800 rounded-2xl p-8 text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-2">¡Hola, {user.name}!</h1>
-        <p className="opacity-90">Bienvenido al panel de descargas de Febrero 2025.</p>
+  if (view === 'menu') {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="bg-gradient-to-r from-reto-navy to-blue-800 rounded-2xl p-8 text-white shadow-lg text-center">
+           <h1 className="text-3xl font-bold mb-2">¡Hola, {user.name}!</h1>
+           <p className="opacity-90">Selecciona una opción para comenzar</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          <div 
+            onClick={() => navigate('/surveys')}
+            className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-reto-navy/20 hover:-translate-y-1 transition-all cursor-pointer group text-center"
+          >
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-reto-navy mx-auto mb-4 group-hover:bg-reto-navy group-hover:text-white transition-colors">
+              <Vote size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">ENCUESTAS</h3>
+            <p className="text-gray-500 text-sm">Participa en las decisiones de tu comunidad</p>
+          </div>
+
+          <div 
+            onClick={() => setView('installers')}
+            className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-reto-navy/20 hover:-translate-y-1 transition-all cursor-pointer group text-center"
+          >
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
+              <Download size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">INSTALADORES</h3>
+            <p className="text-gray-500 text-sm">Descarga aplicaciones premium gratis</p>
+          </div>
+
+          <div 
+            onClick={() => navigate('/winners')}
+            className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-reto-navy/20 hover:-translate-y-1 transition-all cursor-pointer group text-center"
+          >
+            <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600 mx-auto mb-4 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+              <Trophy size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">PREMIOS Y GANADORES</h3>
+            <p className="text-gray-500 text-sm">Consulta los sorteos y ganadores</p>
+          </div>
+        </div>
       </div>
-      <h3 className="text-xl font-bold text-gray-800 flex items-center"><Download className="mr-2"/> Instaladores Disponibles</h3>
+    );
+  }
+
+  // view === 'installers'
+  return (
+    <div className="space-y-6 relative animate-in fade-in slide-in-from-right-4 duration-300">
+      <button 
+        onClick={() => setView('menu')}
+        className="flex items-center text-gray-600 hover:text-reto-navy font-medium transition-colors mb-4"
+      >
+        <ArrowLeft size={20} className="mr-2"/> Volver al Menú
+      </button>
+
+      <div className="bg-gradient-to-r from-reto-navy to-blue-800 rounded-2xl p-8 text-white shadow-lg">
+        <h1 className="text-3xl font-bold mb-2">Instaladores</h1>
+        <p className="opacity-90">Descargas disponibles de Febrero 2025.</p>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-6">
         {MOCK_INSTALLERS.map(inst => (
           <div key={inst.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -938,6 +1027,204 @@ const DashboardScreen = ({ user }: { user: User }) => {
   );
 };
 
+// --- Additional Screens ---
+
+const LoginScreen = ({ onLogin }: { onLogin: (u: User) => void }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const users = getMasterDB();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    // Simple password check (In real app, hash this)
+    if (user && (user.password === password || (!user.password && password === 'admin123'))) {
+      const updatedUser = { ...user, lastLogin: new Date().toISOString() };
+      saveToMasterDB(updatedUser);
+      onLogin(updatedUser);
+    } else {
+      setError('Credenciales incorrectas');
+    }
+  };
+
+  return (
+    <AuthLayout>
+      <h2 className="text-2xl font-bold text-reto-navy text-center mb-6">Iniciar Sesión</h2>
+      {error && <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center"><AlertCircle size={16} className="mr-2"/>{error}</div>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" required className="w-full mt-1 p-2 border rounded-md focus:ring-reto-navy focus:border-reto-navy" value={email} onChange={e => setEmail(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+          <input type="password" required className="w-full mt-1 p-2 border rounded-md focus:ring-reto-navy focus:border-reto-navy" value={password} onChange={e => setPassword(e.target.value)} />
+        </div>
+        <Button fullWidth type="submit">Ingresar</Button>
+      </form>
+      <div className="mt-6 text-center text-sm">
+        <span className="text-gray-600">¿No tienes cuenta?</span>
+        <Link to="/register" className="ml-2 font-bold text-reto-navy hover:underline">Regístrate</Link>
+      </div>
+    </AuthLayout>
+  );
+};
+
+const RegisterScreen = ({ onRegister }: { onRegister: (u: User) => void }) => {
+  const [step, setStep] = useState<'form' | 'verify'>('form');
+  const [formData, setFormData] = useState({
+    name: '', surname: '', age: '', phone: '', email: '', password: '',
+    canton: Object.keys(ZONES)[0], sector: ZONES[Object.keys(ZONES)[0]][0]
+  });
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [userOtp, setUserOtp] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleCantonChange = (canton: string) => {
+    setFormData({ ...formData, canton, sector: ZONES[canton][0] });
+  };
+
+  const handleSendVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Check for existing user
+    const users = getMasterDB();
+    if (users.find(u => u.email.toLowerCase() === formData.email.toLowerCase())) {
+      alert("El correo electrónico ya está registrado.");
+      return;
+    }
+
+    setIsSending(true);
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOtp(code);
+
+    const templateParams = {
+      to_name: `${formData.name} ${formData.surname}`,
+      to_email: formData.email,
+      otp_code: code,
+      message: `Tu código de verificación para Reto 33 es: ${code}` 
+    };
+
+    try {
+      // Using provided credentials
+      await emailjs.send('service_pkc5h87', 'template_rgm0xms', templateParams, 'owUYyPbGCKtFmhc8n');
+      
+      // Keep console log for dev convenience
+      console.log("OTP Sent:", code);
+      alert("Código de verificación enviado a tu correo.");
+      setStep('verify');
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      alert("Hubo un error enviando el código. Por favor verifica tu correo o intenta más tarde. (Revisa la consola para el código si es una prueba local)");
+      // For fallback in case quota exceeded or config error during testing
+      console.log("Fallback OTP:", code); 
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (userOtp === generatedOtp) {
+      const newUser: User = {
+        id: Date.now().toString(),
+        name: formData.name,
+        surname: formData.surname,
+        age: parseInt(formData.age),
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        sector: `${formData.canton} - ${formData.sector}`,
+        role: 'user',
+        registeredAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        isVerified: true,
+        hasVotedCurrentWeek: false,
+        downloadHistory: [],
+        surveyHistory: []
+      };
+      saveToMasterDB(newUser);
+      onRegister(newUser);
+    } else {
+      alert("Código incorrecto. Inténtalo de nuevo.");
+    }
+  };
+
+  if (step === 'verify') {
+    return (
+      <AuthLayout>
+        <div className="text-center mb-6">
+          <div className="inline-flex p-3 bg-blue-50 rounded-full text-reto-navy mb-3">
+            <Mail size={32} />
+          </div>
+          <h2 className="text-2xl font-bold text-reto-navy">Verifica tu Correo</h2>
+          <p className="text-sm text-gray-600 mt-2">
+            Hemos enviado un código de 6 dígitos a <br/>
+            <span className="font-bold">{formData.email}</span>
+          </p>
+        </div>
+
+        <form onSubmit={handleVerify} className="space-y-6">
+          <div>
+            <input 
+              type="text" 
+              maxLength={6}
+              placeholder="000000" 
+              className="w-full text-center text-3xl tracking-widest p-3 border rounded-lg focus:ring-2 focus:ring-reto-navy outline-none font-bold text-gray-800"
+              value={userOtp}
+              onChange={e => setUserOtp(e.target.value.replace(/[^0-9]/g, ''))}
+              autoFocus
+            />
+          </div>
+          <div className="flex gap-3">
+             <Button variant="ghost" fullWidth type="button" onClick={() => setStep('form')}>Atrás</Button>
+             <Button fullWidth type="submit">Verificar</Button>
+          </div>
+          <p className="text-xs text-center text-gray-400">Revisa tu carpeta de Spam si no encuentras el correo.</p>
+        </form>
+      </AuthLayout>
+    );
+  }
+
+  return (
+    <AuthLayout>
+      <h2 className="text-2xl font-bold text-reto-navy text-center mb-6">Registro de Usuario</h2>
+      <form onSubmit={handleSendVerification} className="space-y-3">
+        {/* Existing inputs */}
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="Nombre" required className="p-2 border rounded-md" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+          <input placeholder="Apellido" required className="p-2 border rounded-md" value={formData.surname} onChange={e => setFormData({...formData, surname: e.target.value})} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <input type="number" placeholder="Edad" required className="p-2 border rounded-md" value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} />
+          <input type="tel" placeholder="Celular" required className="p-2 border rounded-md" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <select className="p-2 border rounded-md bg-white" value={formData.canton} onChange={e => handleCantonChange(e.target.value)}>
+            {Object.keys(ZONES).map(z => <option key={z} value={z}>{z}</option>)}
+          </select>
+          <select className="p-2 border rounded-md bg-white" value={formData.sector} onChange={e => setFormData({...formData, sector: e.target.value})}>
+            {ZONES[formData.canton].map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+        <input type="email" placeholder="Email" required className="w-full p-2 border rounded-md" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+        <input type="password" placeholder="Contraseña" required className="w-full p-2 border rounded-md" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+        
+        <Button fullWidth type="submit" variant="secondary" disabled={isSending}>
+           {isSending ? (
+             <span className="flex items-center"><Loader2 className="animate-spin mr-2" size={18}/> Enviando Código...</span>
+           ) : "Registrarse y Verificar"}
+        </Button>
+      </form>
+      <div className="mt-4 text-center text-sm">
+        <Link to="/" className="text-reto-navy hover:underline">Ya tengo cuenta</Link>
+      </div>
+    </AuthLayout>
+  );
+};
+
 const SurveysScreen = ({ user, surveys, onVote }: { user: User, surveys: Survey[], onVote: (sId: string, oId: string) => void }) => {
   return (
     <div className="space-y-6">
@@ -990,6 +1277,38 @@ const SurveysScreen = ({ user, surveys, onVote }: { user: User, surveys: Survey[
   );
 };
 
+const DownloadsScreen = ({ user }: { user: User }) => (
+  <div className="space-y-6">
+    <h1 className="text-2xl font-bold text-reto-navy flex items-center"><History className="mr-2"/> Historial de Descargas</h1>
+    {user.downloadHistory.length === 0 ? (
+      <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+        <Download className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+        <h3 className="text-lg font-medium text-gray-900">No hay descargas aún</h3>
+        <p className="text-gray-500">Visita el panel principal para descargar contenido.</p>
+      </div>
+    ) : (
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instalador</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {user.downloadHistory.map((dl, i) => (
+              <tr key={i}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{dl.installerTitle}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(dl.date).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+);
+
 const WinnersScreen = () => {
   const [tab, setTab] = useState<'prizes' | 'history'>('prizes');
   return (
@@ -1036,38 +1355,6 @@ const WinnersScreen = () => {
   );
 };
 
-const DownloadsScreen = ({ user }: { user: User }) => (
-  <div className="space-y-6">
-    <h1 className="text-2xl font-bold text-reto-navy flex items-center"><History className="mr-2"/> Historial de Descargas</h1>
-    {user.downloadHistory.length === 0 ? (
-      <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-        <Download className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-        <h3 className="text-lg font-medium text-gray-900">No hay descargas aún</h3>
-        <p className="text-gray-500">Visita el panel principal para descargar contenido.</p>
-      </div>
-    ) : (
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instalador</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {user.downloadHistory.map((dl, i) => (
-              <tr key={i}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{dl.installerTitle}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(dl.date).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-);
-
 const ProfileScreen = ({ user, onUpdate }: { user: User, onUpdate: (u: User) => void }) => {
   const [formData, setFormData] = useState({ name: user.name, surname: user.surname, phone: user.phone });
   
@@ -1103,113 +1390,6 @@ const ProfileScreen = ({ user, onUpdate }: { user: User, onUpdate: (u: User) => 
         <Button onClick={handleSave} className="mt-4">Guardar Cambios</Button>
       </div>
     </div>
-  );
-};
-
-const LoginScreen = ({ onLogin }: { onLogin: (u: User) => void }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const users = getMasterDB();
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    // Simple password check (In real app, hash this)
-    if (user && (user.password === password || (!user.password && password === 'admin123'))) {
-      const updatedUser = { ...user, lastLogin: new Date().toISOString() };
-      saveToMasterDB(updatedUser);
-      onLogin(updatedUser);
-    } else {
-      setError('Credenciales incorrectas');
-    }
-  };
-
-  return (
-    <AuthLayout>
-      <h2 className="text-2xl font-bold text-reto-navy text-center mb-6">Iniciar Sesión</h2>
-      {error && <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center"><AlertCircle size={16} className="mr-2"/>{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
-          <input type="email" required className="w-full mt-1 p-2 border rounded-md focus:ring-reto-navy focus:border-reto-navy" value={email} onChange={e => setEmail(e.target.value)} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-          <input type="password" required className="w-full mt-1 p-2 border rounded-md focus:ring-reto-navy focus:border-reto-navy" value={password} onChange={e => setPassword(e.target.value)} />
-        </div>
-        <Button fullWidth type="submit">Ingresar</Button>
-      </form>
-      <div className="mt-6 text-center text-sm">
-        <span className="text-gray-600">¿No tienes cuenta?</span>
-        <Link to="/register" className="ml-2 font-bold text-reto-navy hover:underline">Regístrate</Link>
-      </div>
-    </AuthLayout>
-  );
-};
-
-const RegisterScreen = ({ onRegister }: { onRegister: (u: User) => void }) => {
-  const [formData, setFormData] = useState({
-    name: '', surname: '', age: '', phone: '', email: '', password: '',
-    canton: Object.keys(ZONES)[0], sector: ZONES[Object.keys(ZONES)[0]][0]
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: formData.name,
-      surname: formData.surname,
-      age: parseInt(formData.age),
-      phone: formData.phone,
-      email: formData.email,
-      password: formData.password,
-      sector: `${formData.canton} - ${formData.sector}`,
-      role: 'user',
-      registeredAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-      isVerified: true, // Auto verify for demo
-      hasVotedCurrentWeek: false,
-      downloadHistory: [],
-      surveyHistory: []
-    };
-    saveToMasterDB(newUser);
-    onRegister(newUser);
-  };
-
-  const handleCantonChange = (canton: string) => {
-    setFormData({ ...formData, canton, sector: ZONES[canton][0] });
-  };
-
-  return (
-    <AuthLayout>
-      <h2 className="text-2xl font-bold text-reto-navy text-center mb-6">Registro de Usuario</h2>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <input placeholder="Nombre" required className="p-2 border rounded-md" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-          <input placeholder="Apellido" required className="p-2 border rounded-md" value={formData.surname} onChange={e => setFormData({...formData, surname: e.target.value})} />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <input type="number" placeholder="Edad" required className="p-2 border rounded-md" value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} />
-          <input type="tel" placeholder="Celular" required className="p-2 border rounded-md" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <select className="p-2 border rounded-md bg-white" value={formData.canton} onChange={e => handleCantonChange(e.target.value)}>
-            {Object.keys(ZONES).map(z => <option key={z} value={z}>{z}</option>)}
-          </select>
-          <select className="p-2 border rounded-md bg-white" value={formData.sector} onChange={e => setFormData({...formData, sector: e.target.value})}>
-            {ZONES[formData.canton].map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <input type="email" placeholder="Email" required className="w-full p-2 border rounded-md" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-        <input type="password" placeholder="Contraseña" required className="w-full p-2 border rounded-md" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
-        <Button fullWidth type="submit" variant="secondary">Registrarse</Button>
-      </form>
-      <div className="mt-4 text-center text-sm">
-        <Link to="/" className="text-reto-navy hover:underline">Ya tengo cuenta</Link>
-      </div>
-    </AuthLayout>
   );
 };
 
